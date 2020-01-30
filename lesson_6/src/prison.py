@@ -1,8 +1,12 @@
 import xml.etree.ElementTree as ET
 import os.path
+import sys
+
+sys.path.append(".")
+
 from minecraft import Minecraft
 
-_PRISON_CONFIG_FILE_NAME = 'prison.xml'
+_PRISON_CONFIG_FILE_NAME = 'src/prison.xml'
 _PRISON_X = 0
 _PRISON_Y = 100
 _PRISON_Z = 0
@@ -47,6 +51,7 @@ class _Prisoner:
 
 class Prison:
     def __init__(self):
+        self.__mc = Minecraft.create()
         self.__prisoners = []
         self.__left_top_position = ()
         self.__right_bottom_position = ()
@@ -89,9 +94,9 @@ class Prison:
                 pos.append(int(child.text))
         return tuple(pos)
 
-    def isPrisoner(self, playerId):
+    def isPrisoner(self, playerName):
         for p in self.__prisoners:
-            if p.id == playerId:
+            if p.id == playerName:
                 return True
         return False
 
@@ -101,13 +106,21 @@ class Prison:
                 }
 
     def build(self):
-        mc = Minecraft.create()
-        mc.setBlocks(_PRISON_X - _PRISON_WIDTH / 2, _PRISON_Y, _PRISON_Z - _PRISON_WIDTH / 2,
-                     _PRISON_X + _PRISON_WIDTH / 2, _PRISON_Y, _PRISON_Z + _PRISON_WIDTH / 2,
-                     'glass')
+        self.__mc.setBlocks(
+            _PRISON_X - _PRISON_WIDTH / 2, _PRISON_Y, _PRISON_Z - _PRISON_WIDTH / 2,
+            _PRISON_X + _PRISON_WIDTH / 2, _PRISON_Y, _PRISON_Z + _PRISON_WIDTH / 2,
+            'glass')
 
     def getCenter(self):
         return (_PRISON_X, _PRISON_Y + 1, _PRISON_Z)
+
+    def checkAndMove(self):
+        ids = self.__mc.getPlayerEntityIds()
+        for id in ids:
+            name, id = id.split(':')
+            if self.isPrisoner(name):
+                self.__mc.entity.setTilePos(id, _PRISON_X, _PRISON_Y + 1, _PRISON_Z)
+
 
 
 # Compares floats for equality as proposed in https://www.python.org/dev/peps/pep-0485/#id13

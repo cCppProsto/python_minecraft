@@ -1,7 +1,7 @@
 <root>
     <prisoners>
         <prisoner>
-            <id>cppprosto</id>
+            <id>cppProsto</id>
             <start>0</start>
             <end>1000</end>
             <reason>пожизненно</reason>
