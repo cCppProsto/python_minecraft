@@ -1,0 +1,22 @@
+<root>
+    <prisoners>
+        <prisoner>
+            <id>cppprosto</id>
+            <start>0</start>
+            <end>1000</end>
+            <reason>пожизненно</reason>
+        </prisoner>
+    </prisoners>
+    <prisonPlace>
+        <l_top>
+            <x>10</x>>
+            <y>10</y>>
+            <z>10</z>>
+        </l_top>
+        <r_bottom>
+            <x>100</x>>
+            <y>100</y>>
+            <z>100</z>>
+        </r_bottom>
+    </prisonPlace>
+</root>
