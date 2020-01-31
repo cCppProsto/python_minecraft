@@ -1,16 +1,18 @@
 import xml.etree.ElementTree as ET
-import os.path
-import sys
-
-sys.path.append(".")
+import os
+import time
+from datetime import datetime
 
 from minecraft import Minecraft
+from minecraftWrapper import getPlayerEntityIds
 
-_PRISON_CONFIG_FILE_NAME = 'src/prison.xml'
+_PRISON_CONFIG_FILE_NAME = 'prison.xml'
 _PRISON_X = 0
 _PRISON_Y = 100
 _PRISON_Z = 0
 _PRISON_WIDTH = 40
+
+_TIME_FORMAT = '%Y-%m-%d %H:%M:%S.%f'
 
 # https://docs.python.org/2/library/xml.etree.elementtree.html
 
@@ -59,11 +61,12 @@ class Prison:
         self.__readConfig()
 
     def __readConfig(self):
-        isExist = os.path.isfile(_PRISON_CONFIG_FILE_NAME)
+        path = os.path.dirname(os.path.abspath(__file__)) + '/' + _PRISON_CONFIG_FILE_NAME
+        isExist = os.path.isfile(path)
 
         if not isExist:
             return
-        root = ET.parse(_PRISON_CONFIG_FILE_NAME).getroot()
+        root = ET.parse(path).getroot()
 
         for child in root:
             if child.tag == 'prisoners':
@@ -100,6 +103,22 @@ class Prison:
                 return True
         return False
 
+    def getRemainedTimeStr(self, playerName):
+        for p in self.__prisoners:
+            if p.id == playerName:
+                ts_now = time.time()
+                ts_end = p.end
+
+                if ts_now > ts_end:
+                    return ''
+
+                dt_1 = datetime.fromtimestamp(ts_now)
+                dt_2 = datetime.fromtimestamp(ts_end)
+                v1 = datetime.strptime(dt_1.strftime(_TIME_FORMAT), _TIME_FORMAT)
+                v2 = datetime.strptime(dt_2.strftime(_TIME_FORMAT), _TIME_FORMAT)
+                return str(v2 - v1)
+        return ''
+
     def getPrisonPlace(self):
         return {'left_top': self.__left_top_position,
                 'right_bottom': self.__right_bottom_position,
@@ -115,14 +134,16 @@ class Prison:
         return (_PRISON_X, _PRISON_Y + 1, _PRISON_Z)
 
     def checkAndMove(self):
-        ids = self.__mc.getPlayerEntityIds()
+        ids = getPlayerEntityIds()
         for id in ids:
             name, id = id.split(':')
             if self.isPrisoner(name):
+                cur_pos = self.__mc.entity.getTilePos(id)
                 self.__mc.entity.setTilePos(id, _PRISON_X, _PRISON_Y + 1, _PRISON_Z)
 
 
 
+'''
 # Compares floats for equality as proposed in https://www.python.org/dev/peps/pep-0485/#id13
 # ---------------------------------------------------------------------------------------------------
 def isClose(a, b, relTol=1e-09, absTol=0.0):
@@ -139,3 +160,4 @@ def isPositionsClose(l, r):
     yIsEq = isClose(l[1], r[1])
     zIsEq = isClose(l[2], r[2])
     return xIsEq and yIsEq and zIsEq
+'''
