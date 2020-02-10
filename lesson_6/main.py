@@ -1,7 +1,7 @@
 import time
 import threading
 from src.prison import Prison
-from src.minecraftWrapper import getPlayerEntityIds
+from src.minecraftWrapper import MinecraftSingleton as mc
 
 _isWorking = True
 _prisonIsPause = False
@@ -13,6 +13,14 @@ _MENU_STATE_PRISON = 2
 _CURRENT_MENU_STATE = _MENU_STATE_MAIN
 
 
+def _getIntInput(title, default=0):
+    value = raw_input(title + '(default=' + str(default) + '):  ')
+    if not value:
+        value = default
+    else:
+        value = int(value)
+    return value
+
 def printMainMenu():
     print('1. Prison')
     print('2. Get players')
@@ -22,8 +30,7 @@ def printMainMenu():
 def printPrisonMenu():
     print('1. Add player to prison')
     print('2. Get prisoners')
-    print('3. Get remained time of player')
-    print('4. Back to main menu')
+    print('3. Back to main menu')
 
 
 def printMenu():
@@ -33,14 +40,19 @@ def printMenu():
         printPrisonMenu()
 
 
+def setMenuState(state):
+    global _CURRENT_MENU_STATE
+    _CURRENT_MENU_STATE = state
+
+
 def handleMainMenu(val):
     global _isWorking
 
     if val == 1:
-        pass
+        setMenuState(_MENU_STATE_PRISON)
 
     elif val == 2:
-        players = getPlayerEntityIds()
+        players = mc.getInstance().getPlayerEntityIds()
         print('')
         for p in players:
             v = p.split(':')
@@ -52,7 +64,30 @@ def handleMainMenu(val):
 
 
 def handlePrisonMenu(val):
-    pass
+    if val == 1:
+        p = Prison().getInstance()
+
+        name = str(raw_input('name: '))
+        if p.isPrisoner(name):
+            print(name + ' already in prison')
+            return
+
+        reason = str(raw_input('reason: '))
+        days = _getIntInput('days', 0)
+        hours = _getIntInput('hours', 0)
+        minutes = _getIntInput('minutes', 0)
+
+        p.addToPrison(name=name, reason=reason, days=days, hours=hours, minutes=minutes)
+
+    elif val == 2:
+        p = Prison().getInstance()
+        prisoners = p.getPrisoners()
+        print('')
+        for v in prisoners:
+            print('    name: ' + v + ',  remained: ' + p.getRemainedTimeStr(v))
+        print('')
+    elif val == 3:
+        setMenuState(_MENU_STATE_MAIN)
 
 
 def inputCmdHandler(val):
@@ -74,13 +109,11 @@ def main():
 def manager():
     global _isWorking
 
-    p = Prison()
-    p.build()
+    p = Prison().getInstance()
     while _isWorking:
         if not _prisonIsPause:
             p.checkAndMove()
         time.sleep(1)
-
 
 t1 = threading.Thread(target=main)
 t2 = threading.Thread(target=manager)
