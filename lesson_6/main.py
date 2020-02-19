@@ -1,5 +1,8 @@
 import time
 import threading
+
+from pip._vendor.distlib.compat import raw_input
+
 from src.prison import Prison
 from src.minecraftWrapper import MinecraftSingleton as mc
 
@@ -110,7 +113,7 @@ def main():
     while _isWorking:
         printMenu()
         iv = input()
-        inputCmdHandler(iv)
+        inputCmdHandler(int(iv))
 
 
 def manager():

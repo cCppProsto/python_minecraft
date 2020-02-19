@@ -4,7 +4,7 @@ import os
 import time
 from datetime import datetime
 
-from minecraftWrapper import MinecraftSingleton as mc
+from src.minecraftWrapper import MinecraftSingleton as mc
 
 _PRISON_CONFIG_FILE_NAME = 'prison.xml'
 _TIME_FORMAT = '%Y-%m-%d %H:%M:%S.%f'
@@ -93,8 +93,11 @@ class Prison:
         result_data = _str.format(name, ts_start, ts_end, reason)
 
         newElement = ET.fromstring(result_data)
-        self.__prisonersElement.append(newElement)
-        self.__tree.write(os.path.dirname(os.path.abspath(__file__)) + '/' + _PRISON_CONFIG_FILE_NAME)
+        #self.__prisonersElement.append(newElement)
+        for prisoners in self.__root.findall('prisoners'):
+            prisoners.append(newElement)
+            self.__tree.write(os.path.dirname(os.path.abspath(__file__)) + '/' + _PRISON_CONFIG_FILE_NAME)
+        #pp = os.path.dirname(os.path.abspath(__file__)) + '/' + _PRISON_CONFIG_FILE_NAME
 
     def isPrisoner(self, playerName):
         for p in self.__prisoners:
@@ -201,7 +204,7 @@ class Prison:
             if remainedTime:
                 p = self.getPrisoner(name)
                 if p:
-                    x, y, z = _mc.getEntityTilePos()
+                    x, y, z = _mc.getEntityTilePos(id)
                     xOffset = (p.index * (self.__width + 2))
                     plp = (self.__pos[0] + xOffset, self.__pos[1], self.__pos[2])
                     prp = (self.__pos[0] + self.__width + xOffset, self.__pos[1], self.__pos[2] + self.__width)
@@ -209,7 +212,7 @@ class Prison:
 
                     if x < plp[0] or x > prp[0] or z < plp[2] or z > prp[2] or y < plp[1]:
                         self._buildRoom(plp, prp)
-                        _mc.setEntityTilePos(id, pp[0], pp[1], pp[2])
+                        _mc.setEntityTilePos(id, pp)
 
                     _mc.setSign((plp[0], plp[1]+1, [2]), name, p.reason, 'be happy')
             else:
