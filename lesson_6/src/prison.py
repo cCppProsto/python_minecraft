@@ -176,9 +176,17 @@ class Prison:
                 pos.append(int(child.text))
         return tuple(pos)
 
-    def _build(self, lp, rp):
+    def _buildRoom(self, lp, rp):
         if mc.getInstance():
             mc.getInstance().setBlocks(lp, rp, 'glass')
+
+    def removeFromPrisoners(self, name):
+        for prisoners in self.__root.findall('prisoners'):
+            for prisoner in prisoners.findall('prisoner'):
+                if name == prisoner.find('name').text:
+                    prisoners.remove(prisoner)
+                    self.__tree.write(os.path.dirname(os.path.abspath(__file__)) + '/' + _PRISON_CONFIG_FILE_NAME)
+                    return
 
     def checkAndMove(self):
         if not mc.getInstance():
@@ -200,10 +208,12 @@ class Prison:
                     pp = (self.__pos[0] + self.__width/2, self.__pos[1] + 1, self.__pos[2] + self.__width/2)
 
                     if x < plp[0] or x > prp[0] or z < plp[2] or z > prp[2] or y < plp[1]:
-                        self._build(plp, prp)
+                        self._buildRoom(plp, prp)
                         _mc.setEntityTilePos(id, pp[0], pp[1], pp[2])
 
                     _mc.setSign((plp[0], plp[1]+1, [2]), name, p.reason, 'be happy')
+            else:
+                self.removeFromPrisoners(name)
 
 
 '''
@@ -223,4 +233,27 @@ def isPositionsClose(l, r):
     yIsEq = isClose(l[1], r[1])
     zIsEq = isClose(l[2], r[2])
     return xIsEq and yIsEq and zIsEq
+
+
+
+<root>
+    <prisoners>
+        <prisoner>
+            <name>cppProsto</name>
+            <start>1581321936</start>
+            <end>1582358736</end>
+            <reason>prosto</reason>
+        </prisoner>
+    </prisoners>
+    <prisonPlace>
+        <pos>
+            <x>-100</x>
+            <y>40</y>
+            <z>0</z>
+        </pos>
+        <width>4</width>
+    </prisonPlace>
+</root>
+
+
 '''

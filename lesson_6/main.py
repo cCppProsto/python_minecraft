@@ -29,8 +29,9 @@ def printMainMenu():
 
 def printPrisonMenu():
     print('1. Add player to prison')
-    print('2. Get prisoners')
-    print('3. Back to main menu')
+    print('2. Remove from prison')
+    print('3. Get prisoners')
+    print('4. Back to main menu')
 
 
 def printMenu():
@@ -80,13 +81,19 @@ def handlePrisonMenu(val):
         p.addToPrison(name=name, reason=reason, days=days, hours=hours, minutes=minutes)
 
     elif val == 2:
+        name = str(raw_input('input name: '))
+        p = Prison().getInstance()
+        p.removeFromPrisoners(name)
+
+    elif val == 3:
         p = Prison().getInstance()
         prisoners = p.getPrisoners()
         print('')
         for v in prisoners:
             print('    name: ' + v + ',  remained: ' + p.getRemainedTimeStr(v))
         print('')
-    elif val == 3:
+
+    elif val == 4:
         setMenuState(_MENU_STATE_MAIN)
 
 
