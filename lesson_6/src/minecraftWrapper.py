@@ -1,4 +1,4 @@
-from mcpi.minecraft import Minecraft
+from minecraft import Minecraft
 
 
 class MinecraftSingleton:
@@ -52,7 +52,7 @@ class MinecraftSingleton:
         except:
             pass
 
-    def setSign(self, pos, name, reason, msg):
+    def setSign(self, pos, name, reason, msg, remainedTime):
         try:
             self.__mc.setSign(pos[0],
                               pos[1],
@@ -62,6 +62,6 @@ class MinecraftSingleton:
                               name,
                               reason,
                               msg,
-                              '11111')
+                              remainedTime)
         except:
             pass

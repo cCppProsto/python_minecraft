@@ -77,6 +77,8 @@ class Prison:
         self.__readConfig()
 
     def addToPrison(self, name, reason, days=0, hours=0, minutes=0):
+        self._reloadConfig()
+
         if self.isPrisoner(name):
             return
         period = minutes*60 + hours * 3600 + days*86400
@@ -97,7 +99,7 @@ class Prison:
         for prisoners in self.__root.findall('prisoners'):
             prisoners.append(newElement)
             self.__tree.write(os.path.dirname(os.path.abspath(__file__)) + '/' + _PRISON_CONFIG_FILE_NAME)
-        #pp = os.path.dirname(os.path.abspath(__file__)) + '/' + _PRISON_CONFIG_FILE_NAME
+            self._reloadConfig()
 
     def isPrisoner(self, playerName):
         for p in self.__prisoners:
@@ -138,6 +140,16 @@ class Prison:
 
     def getWidth(self):
         return self.__width
+
+    def _reloadConfig(self):
+        self.__prisoners = []
+        self.__pos = ()
+        self.__width = 0
+
+        self.__root = None
+        self.__tree = None
+        self.__prisonersElement = None
+        self.__readConfig()
 
     def __readConfig(self):
         path = os.path.dirname(os.path.abspath(__file__)) + '/' + _PRISON_CONFIG_FILE_NAME
@@ -181,7 +193,33 @@ class Prison:
 
     def _buildRoom(self, lp, rp):
         if mc.getInstance():
+            # floor
             mc.getInstance().setBlocks(lp, rp, 'glass')
+
+            # roof
+            p1 = (lp[0], lp[1] + 4, lp[2])
+            p2 = (rp[0], rp[1] + 4, rp[2])
+            mc.getInstance().setBlocks(p1, p2, 'cocoa')
+
+            # wall - 1
+            p1 = (lp[0], lp[1], lp[2] - 1)
+            p2 = (p1[0] + self.__width, p1[1] + 3, p1[2])
+            mc.getInstance().setBlocks(p1, p2, 'acacia_log')
+
+            # wall - 2
+            p1 = (lp[0] - 1, lp[1], lp[2])
+            p2 = (p1[0], p1[1] + 3, p1[2] + self.__width)
+            mc.getInstance().setBlocks(p1, p2, 'blue_ice')
+
+            # wall - 3
+            p2 = (rp[0], rp[1], rp[2] + 1)
+            p1 = (p2[0] - self.__width, p2[1] + 3, p2[2])
+            mc.getInstance().setBlocks(p1, p2, 'frosted_ice')
+
+            # wall - 4
+            p2 = (rp[0] + 1, rp[1], rp[2])
+            p1 = (p2[0], p2[1] + 3, p2[2] - self.__width)
+            mc.getInstance().setBlocks(p1, p2, 'ice')
 
     def removeFromPrisoners(self, name):
         for prisoners in self.__root.findall('prisoners'):
@@ -189,6 +227,7 @@ class Prison:
                 if name == prisoner.find('name').text:
                     prisoners.remove(prisoner)
                     self.__tree.write(os.path.dirname(os.path.abspath(__file__)) + '/' + _PRISON_CONFIG_FILE_NAME)
+                    self._reloadConfig()
                     return
 
     def checkAndMove(self):
@@ -208,13 +247,13 @@ class Prison:
                     xOffset = (p.index * (self.__width + 2))
                     plp = (self.__pos[0] + xOffset, self.__pos[1], self.__pos[2])
                     prp = (self.__pos[0] + self.__width + xOffset, self.__pos[1], self.__pos[2] + self.__width)
-                    pp = (self.__pos[0] + self.__width/2, self.__pos[1] + 1, self.__pos[2] + self.__width/2)
+                    pp = (plp[0] + self.__width/2, plp[1] + 1, plp[2] + self.__width/2)
 
                     if x < plp[0] or x > prp[0] or z < plp[2] or z > prp[2] or y < plp[1]:
                         self._buildRoom(plp, prp)
                         _mc.setEntityTilePos(id, pp)
 
-                    _mc.setSign((plp[0], plp[1]+1, [2]), name, p.reason, 'be happy')
+                    _mc.setSign((plp[0], plp[1]+1, [2]), name, p.reason, 'be happy', remainedTime)
             else:
                 self.removeFromPrisoners(name)
 
