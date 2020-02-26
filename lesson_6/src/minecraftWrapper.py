@@ -1,4 +1,7 @@
-from minecraft import Minecraft
+#import sys
+#sys.path.append('/home/cppprosto/games/minecraft_server/server/plugins/JuicyRaspberryPie/mcpi')
+
+from mcpi.minecraft import Minecraft
 
 
 class MinecraftSingleton:

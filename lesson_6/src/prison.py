@@ -64,7 +64,7 @@ class Prison:
                 return cls.__instance
         except:
             return None
-
+    # ---------------------------------------------------------------------------------------------
     def __init__(self):
         self.__prisoners = []
         self.__pos = ()
@@ -75,7 +75,7 @@ class Prison:
         self.__prisonersElement = None
 
         self.__readConfig()
-
+    # ---------------------------------------------------------------------------------------------
     def addToPrison(self, name, reason, days=0, hours=0, minutes=0):
         self._reloadConfig()
 
@@ -95,30 +95,29 @@ class Prison:
         result_data = _str.format(name, ts_start, ts_end, reason)
 
         newElement = ET.fromstring(result_data)
-        #self.__prisonersElement.append(newElement)
         for prisoners in self.__root.findall('prisoners'):
             prisoners.append(newElement)
             self.__tree.write(os.path.dirname(os.path.abspath(__file__)) + '/' + _PRISON_CONFIG_FILE_NAME)
             self._reloadConfig()
-
+    # ---------------------------------------------------------------------------------------------
     def isPrisoner(self, playerName):
         for p in self.__prisoners:
             if p.name == playerName:
                 return True
         return False
-
+    # ---------------------------------------------------------------------------------------------
     def getPrisoners(self):
         list_res = []
         for p in self.__prisoners:
             list_res.append(p.name)
         return list_res
-
+    # ---------------------------------------------------------------------------------------------
     def getPrisoner(self, name):
         for p in self.__prisoners:
             if p.name == name:
                 return p
         return None
-
+    # ---------------------------------------------------------------------------------------------
     def getRemainedTimeStr(self, playerName):
         for p in self.__prisoners:
             if p.name == playerName:
@@ -134,13 +133,13 @@ class Prison:
                 v2 = datetime.strptime(dt_2.strftime(_TIME_FORMAT), _TIME_FORMAT)
                 return str(v2 - v1)
         return ''
-
+    # ---------------------------------------------------------------------------------------------
     def getPos(self):
         return self.__pos
-
+    # ---------------------------------------------------------------------------------------------
     def getWidth(self):
         return self.__width
-
+    # ---------------------------------------------------------------------------------------------
     def _reloadConfig(self):
         self.__prisoners = []
         self.__pos = ()
@@ -150,7 +149,7 @@ class Prison:
         self.__tree = None
         self.__prisonersElement = None
         self.__readConfig()
-
+    # ---------------------------------------------------------------------------------------------
     def __readConfig(self):
         path = os.path.dirname(os.path.abspath(__file__)) + '/' + _PRISON_CONFIG_FILE_NAME
         isExist = os.path.isfile(path)
@@ -167,19 +166,19 @@ class Prison:
                 self.__readPlaceInfo(child)
 
         self.__prisonersElement = self.__root.find('prisoners')
-
+    # ---------------------------------------------------------------------------------------------
     def __readPrisoners(self, prisoners):
         for idx, child in enumerate(prisoners):
             if child.tag == 'prisoner':
                 self.__prisoners.append(_Prisoner(child, idx))
-
+    # ---------------------------------------------------------------------------------------------
     def __readPlaceInfo(self, xmlPlaceData):
         for child in xmlPlaceData:
             if child.tag == 'pos':
                 self.__pos = self.__getPositions(child)
             elif child.tag == 'width':
                 self.__width = int(child.text)
-
+    # ---------------------------------------------------------------------------------------------
     def __getPositions(self, xmlPosData):
         pos = []
         for child in xmlPosData:
@@ -190,7 +189,7 @@ class Prison:
             elif child.tag == 'z':
                 pos.append(int(child.text))
         return tuple(pos)
-
+    # ---------------------------------------------------------------------------------------------
     def _buildRoom(self, lp, rp):
         if mc.getInstance():
             # floor
@@ -199,28 +198,28 @@ class Prison:
             # roof
             p1 = (lp[0], lp[1] + 4, lp[2])
             p2 = (rp[0], rp[1] + 4, rp[2])
-            mc.getInstance().setBlocks(p1, p2, 'cocoa')
+            mc.getInstance().setBlocks(p1, p2, 'glass')
 
             # wall - 1
             p1 = (lp[0], lp[1], lp[2] - 1)
             p2 = (p1[0] + self.__width, p1[1] + 3, p1[2])
-            mc.getInstance().setBlocks(p1, p2, 'acacia_log')
+            mc.getInstance().setBlocks(p1, p2, 'glass')
 
             # wall - 2
             p1 = (lp[0] - 1, lp[1], lp[2])
             p2 = (p1[0], p1[1] + 3, p1[2] + self.__width)
-            mc.getInstance().setBlocks(p1, p2, 'blue_ice')
+            mc.getInstance().setBlocks(p1, p2, 'glass')
 
             # wall - 3
             p2 = (rp[0], rp[1], rp[2] + 1)
             p1 = (p2[0] - self.__width, p2[1] + 3, p2[2])
-            mc.getInstance().setBlocks(p1, p2, 'frosted_ice')
+            mc.getInstance().setBlocks(p1, p2, 'glass')
 
             # wall - 4
             p2 = (rp[0] + 1, rp[1], rp[2])
             p1 = (p2[0], p2[1] + 3, p2[2] - self.__width)
-            mc.getInstance().setBlocks(p1, p2, 'ice')
-
+            mc.getInstance().setBlocks(p1, p2, 'glass')
+    # ---------------------------------------------------------------------------------------------
     def removeFromPrisoners(self, name):
         for prisoners in self.__root.findall('prisoners'):
             for prisoner in prisoners.findall('prisoner'):
@@ -229,7 +228,7 @@ class Prison:
                     self.__tree.write(os.path.dirname(os.path.abspath(__file__)) + '/' + _PRISON_CONFIG_FILE_NAME)
                     self._reloadConfig()
                     return
-
+    # ---------------------------------------------------------------------------------------------
     def checkAndMove(self):
         if not mc.getInstance():
             return
